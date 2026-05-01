@@ -1,2 +1,9 @@
 4G module + SIM for offshore telemetry upload to ehuber.info
+GPS -> position, SOG, COG in boaterface
+RTL-SDR for AIS vessel tracking
+chart display in boaterface: raster/vector charts + own position (GPS) + other vessels (AIS)
 BNO055 IMU over I2C -> heading and heel display in the boaterface
+autopilot: HDG mode (hold heading from IMU)
+autopilot: physical tiller buttons for OFF / HDG / WND modes
+autopilot: WND mode (hold wind angle)
+anemometer + wind vane -> wind speed and direction in boaterface (candidate: https://www.sparkfun.com/weather-meter-kit.html) — mount on gimbaled platform to compensate for heel
