@@ -32,14 +32,37 @@
       font-weight: bold;
       color: #44aaff;
     }
+    #staleness {
+      margin-top: 0.75rem;
+      font-size: 0.75rem;
+      color: #444;
+      transition: color 0.3s;
+    }
+    #staleness.stale { color: #ff4444; }
   </style>
 </head>
 <body>
   <div class="instrument">
     <div class="label">UTC</div>
-    <div class="value" hx-get="/time" hx-trigger="every 1s" hx-swap="innerHTML">
+    <div class="value" id="time" hx-get="/time" hx-trigger="every 1s" hx-swap="innerHTML">
       --:--:--
     </div>
+    <div id="staleness"></div>
   </div>
+  <script>
+    let lastUpdate = null;
+
+    document.getElementById('time').addEventListener('htmx:afterSwap', () => {
+      lastUpdate = Date.now();
+    });
+
+    setInterval(() => {
+      const el = document.getElementById('staleness');
+      if (lastUpdate === null) return;
+      const seconds = Math.floor((Date.now() - lastUpdate) / 1000);
+      el.textContent = `last update ${seconds}s ago`;
+      el.classList.toggle('stale', seconds >= 3);
+    }, 500);
+  </script>
 </body>
 </html>
