@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>boaterface</title>
+  <script src="/htmx.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0a0a;
+      color: #e0e0e0;
+      font-family: monospace;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .instrument {
+      text-align: center;
+      padding: 2rem;
+    }
+    .label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+    .value {
+      font-size: 4rem;
+      font-weight: bold;
+      color: #44aaff;
+    }
+  </style>
+</head>
+<body>
+  <div class="instrument">
+    <div class="label">UTC</div>
+    <div class="value" hx-get="/time" hx-trigger="every 1s" hx-swap="innerHTML">
+      --:--:--
+    </div>
+  </div>
+</body>
+</html>

@@ -57,6 +57,11 @@ source "arm" "raspios" {
 build {
   sources = ["source.arm.raspios"]
 
+  provisioner "file" {
+    source      = "files/boaterface"
+    destination = "/usr/local/lib/"
+  }
+
   provisioner "shell" {
     script = "scripts/setup.sh"
   }

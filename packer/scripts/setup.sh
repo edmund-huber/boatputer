@@ -49,33 +49,9 @@ EOF
 
 chmod 600 /etc/NetworkManager/system-connections/boatputer-ap.nmconnection
 
-cat > /usr/local/bin/boaterface.py <<'EOF'
-#!/usr/bin/env python3
-from http.server import HTTPServer, BaseHTTPRequestHandler
-from datetime import datetime, timezone
+python3 -c "import urllib.request; urllib.request.urlretrieve('https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js', '/usr/local/lib/boaterface/htmx.min.js')"
 
-class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        body = f"""<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>boaterface</title></head>
-<body>
-<h1>{datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}</h1>
-</body>
-</html>""".encode()
-        self.send_response(200)
-        self.send_header('Content-Type', 'text/html')
-        self.send_header('Content-Length', len(body))
-        self.end_headers()
-        self.wfile.write(body)
-
-    def log_message(self, *args):
-        pass
-
-HTTPServer(('', 80), Handler).serve_forever()
-EOF
-
-chmod +x /usr/local/bin/boaterface.py
+chmod +x /usr/local/lib/boaterface/server.py
 
 cat > /etc/systemd/system/boaterface.service <<'EOF'
 [Unit]
@@ -83,7 +59,7 @@ Description=boaterface
 After=network.target
 
 [Service]
-ExecStart=/usr/local/bin/boaterface.py
+ExecStart=/usr/local/lib/boaterface/server.py
 Restart=always
 
 [Install]
