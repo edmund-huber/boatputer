@@ -9,20 +9,18 @@ if [ ! -f "$IMG" ]; then
 fi
 
 find_removable() {
-    local found=()
     for dev in /sys/block/*/removable; do
         [ "$(cat "$dev")" = "1" ] || continue
         devname=$(basename "$(dirname "$dev")")
         devpath=$(readlink -f "/sys/block/$devname")
         # accept mmcblk (SD slot) or USB-connected devices only
         [[ "$devname" == mmcblk* ]] || [[ "$devpath" == *usb* ]] || continue
-        found+=("/dev/$devname")
+        echo "/dev/$devname"
     done
-    echo "${found[@]:-}"
 }
 
 if [ -z "${1:-}" ]; then
-    mapfile -t candidates < <(find_removable | tr ' ' '\n')
+    mapfile -t candidates < <(find_removable)
     if [ "${#candidates[@]}" -eq 0 ]; then
         echo "error: no removable devices found"
         echo "usage: $0 <device>  (e.g. $0 /dev/sdX)"

@@ -18,3 +18,32 @@ apt-get install -y --no-install-recommends \
     python3
 apt-get clean
 rm -rf /var/lib/apt/lists/*
+
+raspi-config nonint do_wifi_country US
+
+# NetworkManager AP connection profile — NM handles DHCP via its built-in dnsmasq (method=shared)
+mkdir -p /etc/NetworkManager/system-connections
+cat > /etc/NetworkManager/system-connections/boatputer-ap.nmconnection <<'EOF'
+[connection]
+id=boatputer-ap
+type=wifi
+interface-name=wlan0
+autoconnect=true
+
+[wifi]
+mode=ap
+ssid=boatputer
+
+[wifi-security]
+key-mgmt=wpa-psk
+psk=b1gf4tg0rbst3r
+
+[ipv4]
+method=shared
+address1=192.168.4.1/24
+
+[ipv6]
+method=disabled
+EOF
+
+chmod 600 /etc/NetworkManager/system-connections/boatputer-ap.nmconnection
