@@ -10,11 +10,20 @@ fi
 
 find_removable() {
     for dev in /sys/block/*/removable; do
-        [ "$(cat "$dev")" = "1" ] || continue
         devname=$(basename "$(dirname "$dev")")
+        if [ "$(cat "$dev")" != "1" ]; then
+            echo "  skipping $devname: not removable" >&2
+            continue
+        fi
         devpath=$(readlink -f "/sys/block/$devname")
-        # accept mmcblk (SD slot) or USB-connected devices only
-        [[ "$devname" == mmcblk* ]] || [[ "$devpath" == *usb* ]] || continue
+        if [[ "$devname" != mmcblk* ]] && [[ "$devpath" != *usb* ]]; then
+            echo "  skipping $devname: not mmcblk or USB" >&2
+            continue
+        fi
+        if [ "$(cat "/sys/block/$devname/size" 2>/dev/null)" = "0" ]; then
+            echo "  skipping $devname: no media" >&2
+            continue
+        fi
         echo "/dev/$devname"
     done
 }
