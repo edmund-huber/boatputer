@@ -15,7 +15,8 @@ grep -qxF 'enable_uart=1' /boot/firmware/config.txt || echo 'enable_uart=1' >> /
 
 apt-get update
 apt-get install -y --no-install-recommends \
-    python3
+    python3 \
+    avahi-daemon
 apt-get clean
 rm -rf /var/lib/apt/lists/*
 
@@ -47,10 +48,6 @@ method=disabled
 EOF
 
 chmod 600 /etc/NetworkManager/system-connections/boatputer-ap.nmconnection
-
-# Redirect all DNS queries to the Pi so browsers open the captive portal automatically
-mkdir -p /etc/NetworkManager/dnsmasq-shared.d
-echo 'address=/#/192.168.4.1' > /etc/NetworkManager/dnsmasq-shared.d/captive-portal.conf
 
 cat > /usr/local/bin/boaterface.py <<'EOF'
 #!/usr/bin/env python3
