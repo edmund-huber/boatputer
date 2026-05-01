@@ -47,3 +47,50 @@ method=disabled
 EOF
 
 chmod 600 /etc/NetworkManager/system-connections/boatputer-ap.nmconnection
+
+# Redirect all DNS queries to the Pi so browsers open the captive portal automatically
+mkdir -p /etc/NetworkManager/dnsmasq-shared.d
+echo 'address=/#/192.168.4.1' > /etc/NetworkManager/dnsmasq-shared.d/captive-portal.conf
+
+cat > /usr/local/bin/boaterface.py <<'EOF'
+#!/usr/bin/env python3
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from datetime import datetime, timezone
+
+class Handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>boaterface</title></head>
+<body>
+<h1>{datetime.now(timezone.utc).strftime('%H:%M:%S UTC')}</h1>
+</body>
+</html>""".encode()
+        self.send_response(200)
+        self.send_header('Content-Type', 'text/html')
+        self.send_header('Content-Length', len(body))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def log_message(self, *args):
+        pass
+
+HTTPServer(('', 80), Handler).serve_forever()
+EOF
+
+chmod +x /usr/local/bin/boaterface.py
+
+cat > /etc/systemd/system/boaterface.service <<'EOF'
+[Unit]
+Description=boaterface
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/boaterface.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+systemctl enable boaterface.service
