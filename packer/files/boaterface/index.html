@@ -15,11 +15,9 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      gap: 3rem;
     }
-    .instrument {
-      text-align: center;
-      padding: 2rem;
-    }
+    .instrument { text-align: center; padding: 2rem; }
     .label {
       font-size: 0.8rem;
       text-transform: uppercase;
@@ -32,37 +30,50 @@
       font-weight: bold;
       color: #44aaff;
     }
-    #staleness {
+    .staleness {
       margin-top: 0.75rem;
       font-size: 0.75rem;
       color: #444;
       transition: color 0.3s;
     }
-    #staleness.stale { color: #ff4444; }
+    .staleness.stale { color: #ff4444; }
   </style>
 </head>
 <body>
   <div class="instrument">
     <div class="label">UTC</div>
-    <div class="value" id="time" hx-get="/time" hx-trigger="every 1s" hx-swap="innerHTML">
-      --:--:--
-    </div>
-    <div id="staleness"></div>
+    <div class="value" id="time" hx-get="/time" hx-trigger="every 1s" hx-swap="innerHTML">--:--:--</div>
+    <div class="staleness" id="time-stale"></div>
+  </div>
+  <div class="instrument">
+    <div class="label">HDG</div>
+    <div class="value" id="heading" hx-get="/heading" hx-trigger="every 1s" hx-swap="innerHTML">---°</div>
+    <div id="cal" hx-get="/cal" hx-trigger="every 2s" hx-swap="innerHTML" style="margin-top:0.75rem;font-size:1.5rem;letter-spacing:0.4em">&#9679;&#9679;&#9679;</div>
+    <div class="staleness" id="heading-stale"></div>
+  </div>
+  <div class="instrument">
+    <div class="label">HEEL</div>
+    <div class="value" id="heel" hx-get="/heel" hx-trigger="every 1s" hx-swap="innerHTML">--°</div>
+    <div class="staleness" id="heel-stale"></div>
   </div>
   <script>
-    let lastUpdate = null;
+    function trackStaleness(valueId, stalenessId) {
+      let lastUpdate = null;
+      document.getElementById(valueId).addEventListener('htmx:afterSwap', () => {
+        lastUpdate = Date.now();
+      });
+      setInterval(() => {
+        const el = document.getElementById(stalenessId);
+        if (lastUpdate === null) return;
+        const secs = Math.floor((Date.now() - lastUpdate) / 1000);
+        el.textContent = `last update ${secs}s ago`;
+        el.classList.toggle('stale', secs >= 3);
+      }, 500);
+    }
 
-    document.getElementById('time').addEventListener('htmx:afterSwap', () => {
-      lastUpdate = Date.now();
-    });
-
-    setInterval(() => {
-      const el = document.getElementById('staleness');
-      if (lastUpdate === null) return;
-      const seconds = Math.floor((Date.now() - lastUpdate) / 1000);
-      el.textContent = `last update ${seconds}s ago`;
-      el.classList.toggle('stale', seconds >= 3);
-    }, 500);
+    trackStaleness('time', 'time-stale');
+    trackStaleness('heading', 'heading-stale');
+    trackStaleness('heel', 'heel-stale');
   </script>
 </body>
 </html>
