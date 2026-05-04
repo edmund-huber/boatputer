@@ -3,10 +3,22 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from datetime import datetime, timezone
 from pathlib import Path
 import struct
+import threading
 import time
 
 STATIC = Path('/usr/local/lib/boaterface')
 BNO_ADDR = 0x28
+
+def _watchdog_thread():
+    try:
+        with open('/dev/watchdog', 'wb', buffering=0) as wdog:
+            while True:
+                wdog.write(b'1')
+                time.sleep(5)
+    except OSError:
+        pass
+
+threading.Thread(target=_watchdog_thread, daemon=True).start()
 
 try:
     import smbus
