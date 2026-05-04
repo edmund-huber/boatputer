@@ -13,9 +13,15 @@ echo 'user:$6$0OB1OQvdH39TqH57$vtc6JKQ9kYMH0AjCpEb8xW0ptZnuiTdejcoAeqWpCMIrV9ICu
 # Route the hardware UART to the GPIO pins (40-pin header, pins 8/10)
 grep -qxF 'enable_uart=1' /boot/firmware/config.txt || echo 'enable_uart=1' >> /boot/firmware/config.txt
 
+# Software I2C on GPIO 23/24 (bus 3) — avoids RPi hardware I2C clock-stretching bug
+grep -qxF 'dtoverlay=i2c-gpio,bus=3' /boot/firmware/config.txt || echo 'dtoverlay=i2c-gpio,bus=3' >> /boot/firmware/config.txt
+grep -qxF 'i2c-dev' /etc/modules || echo 'i2c-dev' >> /etc/modules
+
 apt-get update
 apt-get install -y --no-install-recommends \
     python3 \
+    python3-smbus \
+    i2c-tools \
     avahi-daemon
 apt-get clean
 rm -rf /var/lib/apt/lists/*
